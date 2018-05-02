@@ -1,6 +1,7 @@
 .DEFAULT_GOAL = all
 
 GO := go
+GODOCKER=GOOS=linux GOARCH=amd64 go
 VERSION  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
 
 NAME     := github-tools
@@ -8,6 +9,9 @@ PACKAGE  := github.com/corpix/$(NAME)
 PACKAGES := $(shell go list ./... | grep -v /vendor/)
 
 BIN := $(NAME)
+
+TAG=latest
+IMAGE=unchartedsky/$(BIN)
 
 .PHONY: all
 all:: dependencies
@@ -32,6 +36,13 @@ lint::
 
 .PHONY: check
 check:: lint test
+
+image: dependencies
+	$(GODOCKER) build -a -installsuffix cgo -o bin/$(BIN) .
+	docker build -t $(IMAGE):$(TAG) .
+
+deploy: image
+	docker push $(IMAGE):$(TAG)
 
 .PHONY: clean
 clean:

@@ -16,13 +16,10 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/spf13/cobra"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
-	"github.com/deckarep/golang-set"
-
 	"github.com/spf13/viper"
 	"log"
 	"os"
@@ -35,9 +32,8 @@ var addEveryoneCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: Work your own magic here
 		accessToken := viper.Get("accessToken").(string)
-		if len(accessToken) ==0 {
-			log.Fatal("GitHub access token is required!")
-		}
+		targetOrg := cmd.Flag("org").Value.String()
+		targetTeam := cmd.Flag("team").Value.String()
 
 		ctx := context.Background()
 		ts := oauth2.StaticTokenSource(
@@ -47,18 +43,22 @@ var addEveryoneCmd = &cobra.Command{
 
 		client := github.NewClient(tc)
 
-
-		teams, _, err := client.Organizations.ListTeams(ctx, Org, nil)
+		teams, _, err := client.Organizations.ListTeams(ctx, targetOrg, nil)
 		if err != nil {
-			log.Printf("Team `%s` is not found in the organization `%s`!", Team, Org)
+			log.Printf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
 			log.Fatal(err)
 		}
-		team := Find(teams, Team)
+		team := Find(teams, targetTeam)
 		if team == nil {
-			log.Fatalf("Team `%s` is not found in the organization `%s`!", Team, Org)
+			newTeam := &github.NewTeam {Name: targetTeam}
+			team, _, err = client.Organizations.CreateTeam(ctx, targetOrg, newTeam)
+			if err != nil {
+				log.Println(err)
+				log.Fatalf("Failed to create the new team `%s`  in the organization `%s`!", targetTeam, targetOrg)
+			}
 		}
 
-		orgUsers, _, err := client.Organizations.ListMembers(ctx, Org, nil)
+		orgUsers, _, err := client.Organizations.ListMembers(ctx, targetOrg, nil)
 		teamUsers, _, err := client.Organizations.ListTeamMembers(ctx, *team.ID, nil)
 
 		numberOfNewUsers := len(orgUsers) - len(teamUsers)
@@ -74,18 +74,15 @@ var addEveryoneCmd = &cobra.Command{
 			login := userLogin.(string)
 			_, _, err := client.Organizations.AddTeamMembership(ctx, *team.ID, login, nil)
 			if err != nil {
-				log.Printf("Failed to add a user `%s` to the team `%s`: ", login, Team)
+				log.Printf("Failed to add a user `%s` to the team `%s`: ", login, targetTeam)
 				log.Print(err)
 			}
-			log.Printf("`%s` is now a member of the team `%s`.", login, Team)
+			log.Printf("`%s` is now a member of the team `%s`.", login, targetTeam)
 		}
 
-		fmt.Println("Done!")
+		log.Println("Done!")
 	},
 }
-
-var Team string
-var Org string
 
 func init() {
 	RootCmd.AddCommand(addEveryoneCmd)
@@ -94,45 +91,14 @@ func init() {
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// add-everyoneCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// addEveryoneCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// add-everyoneCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// addEveryoneCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	addEveryoneCmd.Flags().StringVar(&Org, "org", "" , "GitHub organization")
+	addEveryoneCmd.Flags().String("org", "" , "GitHub organization")
 	addEveryoneCmd.MarkFlagRequired("org")
-	addEveryoneCmd.Flags().StringVar(&Team, "team", "", "Team which every member of the organization belongs to")
+	addEveryoneCmd.Flags().String("team", "", "Team which every member of the organization belongs to")
 	addEveryoneCmd.MarkFlagRequired("team")
-
-}
-
-func Find(teams []*github.Team, teamName string) *github.Team {
-	for _, team := range teams {
-		if teamName == *team.Name {
-			return team
-		}
-	}
-	return nil
-}
-
-func Map(vs []*github.User) []interface{} {
-	vsm := make([]interface{}, len(vs))
-	for i, v := range vs {
-		vsm[i] = *v.Login
-	}
-	return vsm
-}
-
-func NewUserLogins(orgUsers []*github.User, teamUsers []*github.User) mapset.Set {
-	// TODO 깔끔한 알고리즘으로 나중에 교체하자
-	orgUserIds := Map(orgUsers)
-	orgLogins := mapset.NewSetFromSlice( orgUserIds)
-
-	teamUserIds := Map(teamUsers)
-	teamLogins:= mapset.NewSetFromSlice(teamUserIds)
-
-	newUserLogins := orgLogins.Difference(teamLogins)
-
-	return newUserLogins
 }

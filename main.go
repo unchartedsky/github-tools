@@ -14,8 +14,16 @@
 
 package main
 
-import "github.com/UnchartedSky/github-tools/cmd"
+import (
+	"github.com/UnchartedSky/github-tools/cmd"
+	"log"
+)
 
 func main() {
 	cmd.Execute()
+}
+
+func init() {
+	// Remove timestamp from logging records
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 }
