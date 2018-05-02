@@ -1,34 +1,43 @@
 .DEFAULT_GOAL = all
 
-version  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
+GO := go
+VERSION  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
 
-name     := github-tools
-package  := github.com/corpix/$(name)
-packages := $(shell go list ./... | grep -v /vendor/)
+NAME     := github-tools
+PACKAGE  := github.com/corpix/$(NAME)
+PACKAGES := $(shell go list ./... | grep -v /vendor/)
+
+BIN := $(NAME)
 
 .PHONY: all
 all:: dependencies
 all:: build
 
-.PHONY: dependencies
 dependencies::
-        dep ensure
+	dep ensure
 
-.PHONY: test
-test::
-        go test -v $(packages)
+build: dependencies
+	$(GO) build -a -installsuffix cgo -o bin/$(BIN) .
+
+test: build
+	go test -v $(PACKAGES)
 
 .PHONY: bench
 bench::
-        go test -bench=. -v $(packages)
+	go test  -race -coverprofile=coverage.txt -covermode=atomic -bench=. -v $(PACKAGES)
 
 .PHONY: lint
 lint::
-        go vet -v $(packages)
+	go vet -v $(PACKAGES)
 
 .PHONY: check
 check:: lint test
 
 .PHONY: clean
-clean::
-        git clean -xddff
+clean:
+	rm -rf bin/
+	rm -f coverage.txt
+
+cleanall: clean
+	rm -rf vendor/
+	# git clean -xddff

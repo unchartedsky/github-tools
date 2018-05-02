@@ -14,7 +14,7 @@
 
 package main
 
-import "github-tools/cmd"
+import "github.com/UnchartedSky/github-tools/cmd"
 
 func main() {
 	cmd.Execute()

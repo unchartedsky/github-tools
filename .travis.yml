@@ -1,0 +1,19 @@
+dist: trusty
+
+language: go
+
+go:
+  - 1.10.x
+
+cache:
+  directories:
+    - ${TRAVIS_BUILD_DIR}/vendor
+
+install: 
+  - curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
+script:
+  - make test
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
