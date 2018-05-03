@@ -16,7 +16,7 @@ package cmd
 
 import (
 	"os"
-
+	"github.com/getsentry/raven-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"log"
@@ -39,6 +39,7 @@ var RootCmd = &cobra.Command{
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		log.Println(err)
+		raven.CaptureErrorAndWait(err, nil)
 		os.Exit(-1)
 	}
 }

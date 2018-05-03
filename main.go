@@ -17,6 +17,8 @@ package main
 import (
 	"github.com/UnchartedSky/github-tools/cmd"
 	"log"
+	"github.com/getsentry/raven-go"
+	"os"
 )
 
 func main() {
@@ -26,4 +28,17 @@ func main() {
 func init() {
 	// Remove timestamp from logging records
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+
+	// Sentry.io
+	dsn := os.Getenv("SENTRY_DSN")
+	if len(dsn) > 0 {
+		err := raven.SetDSN(dsn)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	raven.CapturePanic(func() {
+		// do all of the scary things here
+	}, nil)
 }

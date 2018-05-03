@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"os"
+	"github.com/getsentry/raven-go"
 )
 
 // addEveryoneCmd represents the add-everyone command
@@ -46,6 +47,7 @@ var addEveryoneCmd = &cobra.Command{
 		teams, _, err := client.Organizations.ListTeams(ctx, targetOrg, nil)
 		if err != nil {
 			log.Printf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
+			raven.CaptureErrorAndWait(err, nil)
 			log.Fatal(err)
 		}
 		team := Find(teams, targetTeam)
@@ -54,6 +56,7 @@ var addEveryoneCmd = &cobra.Command{
 			team, _, err = client.Organizations.CreateTeam(ctx, targetOrg, newTeam)
 			if err != nil {
 				log.Println(err)
+				raven.CaptureErrorAndWait(err, nil)
 				log.Fatalf("Failed to create the new team `%s`  in the organization `%s`!", targetTeam, targetOrg)
 			}
 		}

@@ -22,6 +22,7 @@ import (
 	"log"
 	"golang.org/x/oauth2"
 	"github.com/google/go-github/github"
+	"github.com/getsentry/raven-go"
 )
 
 // addTeamCmd represents the addTeam command
@@ -48,10 +49,12 @@ var addTeamCmd = &cobra.Command{
 		teams, _, err := client.Organizations.ListTeams(ctx, targetOrg, nil)
 		if err != nil {
 			log.Printf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
+			raven.CaptureErrorAndWait(err, nil)
 			log.Fatal(err)
 		}
 		team := Find(teams, targetTeam)
 		if team == nil {
+			raven.CaptureErrorAndWait(err, nil)
 			log.Fatalf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
 		}
 
@@ -59,6 +62,7 @@ var addTeamCmd = &cobra.Command{
 		for {
 			repos, resp, err := client.Repositories.ListByOrg(context.Background(), targetOrg, opt)
 			if err != nil {
+				raven.CaptureErrorAndWait(err, nil)
 				log.Fatal(err)
 			}
 
@@ -74,6 +78,7 @@ var addTeamCmd = &cobra.Command{
 				option := &github.OrganizationAddTeamRepoOptions {Permission: permission}
 				_, err = client.Organizations.AddTeamRepo(ctx, *team.ID, targetOrg, repoName, option)
 				if err != nil {
+					raven.CaptureErrorAndWait(err, nil)
 					log.Fatal(err)
 				}
 			}

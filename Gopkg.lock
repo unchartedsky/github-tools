@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/certifi/gocertifi"
+  packages = ["."]
+  revision = "deb3ae2ef2610fde3330947281941c562861188b"
+  version = "2018.01.18"
+
+[[projects]]
   name = "github.com/deckarep/golang-set"
   packages = ["."]
   revision = "1d4478f51bed434f1dadf96dcd9b43aabac66795"
@@ -12,6 +18,12 @@
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/getsentry/raven-go"
+  packages = ["."]
+  revision = "263040ce1a362270b5897a5982572ddc1fe807be"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -71,6 +83,12 @@
   packages = ["."]
   revision = "acdc4509485b587f5e675510c4f2c63e90ff68a8"
   version = "v1.1.0"
+
+[[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -171,6 +189,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "07d42678192aae7721695568947e40c4c24e6bcd51e5459653579abfabe6b03a"
+  inputs-digest = "0102ccadacbcb0381a6f7aa2586e2c40a3105e930dfda0852ec53701becc4510"
   solver-name = "gps-cdcl"
   solver-version = 1

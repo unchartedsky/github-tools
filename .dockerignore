@@ -64,5 +64,3 @@ com_crashlytics_export_strings.xml
 # Golang dep
 vendor/
 
-# Misc
-bin/
