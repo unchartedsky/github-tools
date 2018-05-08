@@ -25,7 +25,7 @@ func Map(vs []*github.User) []interface{} {
 func NewUserLogins(orgUsers []*github.User, teamUsers []*github.User) mapset.Set {
 	// TODO 깔끔한 알고리즘으로 나중에 교체하자
 	orgUserIds := Map(orgUsers)
-	orgLogins := mapset.NewSetFromSlice( orgUserIds)
+	orgLogins := mapset.NewSetFromSlice(orgUserIds)
 
 	teamUserIds := Map(teamUsers)
 	teamLogins:= mapset.NewSetFromSlice(teamUserIds)

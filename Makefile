@@ -1,7 +1,7 @@
 .DEFAULT_GOAL = all
 
 GO := go
-GODOCKER=GOOS=linux GOARCH=amd64 go
+GODOCKER=CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go
 VERSION  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
 
 NAME     := github-tools
@@ -21,7 +21,7 @@ dependencies::
 	dep ensure
 
 build: dependencies
-	$(GO) build -a -installsuffix cgo -o bin/$(BIN) .
+	$(GO) build -a -o bin/$(BIN) .
 
 test: build
 	go test -v $(PACKAGES)
