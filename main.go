@@ -16,8 +16,8 @@ package main
 
 import (
 	"github.com/UnchartedSky/github-tools/cmd"
-	"log"
 	"github.com/getsentry/raven-go"
+	"log"
 	"os"
 )
 

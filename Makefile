@@ -38,7 +38,7 @@ lint::
 check:: lint test
 
 image: dependencies
-	$(GODOCKER) build -a -installsuffix cgo -o bin/$(BIN) .
+	$(GODOCKER) build -a -o bin/$(BIN) .
 	docker build -t $(IMAGE):$(TAG) .
 
 deploy: image
