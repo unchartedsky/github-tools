@@ -22,10 +22,7 @@ import (
 	"golang.org/x/oauth2"
 	"github.com/spf13/viper"
 	"log"
-	"os"
 	"github.com/getsentry/raven-go"
-	"github.com/deckarep/golang-set"
-	"sync"
 )
 
 // addEveryoneCmd represents the add-everyone command
@@ -52,10 +49,10 @@ var addEveryoneCmd = &cobra.Command{
 			raven.CaptureErrorAndWait(err, nil)
 			log.Fatal(err)
 		}
-		team := Find(teams, targetTeam)
+		team := findTeam(teams, targetTeam)
 		if team == nil {
 			newTeamPrivacy := "closed"
-			newTeam := &github.NewTeam {Name: targetTeam, Privacy: &newTeamPrivacy}
+			newTeam := &github.NewTeam{Name: targetTeam, Privacy: &newTeamPrivacy}
 			team, _, err = client.Organizations.CreateTeam(ctx, targetOrg, newTeam)
 			if err != nil {
 				log.Println(err)
@@ -80,40 +77,6 @@ var addEveryoneCmd = &cobra.Command{
 	},
 }
 
-func getUserLogins(client *github.Client, ctx context.Context, org string, team int64) mapset.Set {
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	var orgUsers []*github.User
-	go func() {
-		orgUsers, _, _ = client.Organizations.ListMembers(ctx, org, nil)
-		wg.Done()
-	} ()
-
-	var teamUsers []*github.User
-	go func() {
-		teamUsers, _, _ = client.Organizations.ListTeamMembers(ctx, team, nil)
-		wg.Done()
-	} ()
-
-	wg.Wait()
-
-	if orgUsers == nil {
-		log.Fatal("Getting the list of organization members failed!")
-	}
-	if teamUsers == nil {
-		log.Fatal("Getting the list of team members failed!")
-	}
-
-	numberOfNewUsers := len(orgUsers) - len(teamUsers)
-	if numberOfNewUsers == 0 {
-		log.Printf("No new users are found.")
-		os.Exit(0)
-	}
-	log.Printf("%d new users are found", len(orgUsers)-len(teamUsers))
-	return NewUserLogins(orgUsers, teamUsers)
-}
-
 func init() {
 	RootCmd.AddCommand(addEveryoneCmd)
 
@@ -127,7 +90,7 @@ func init() {
 	// is called directly, e.g.:
 	// addEveryoneCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	addEveryoneCmd.Flags().String("org", "" , "GitHub organization")
+	addEveryoneCmd.Flags().String("org", "", "GitHub organization")
 	addEveryoneCmd.MarkFlagRequired("org")
 	addEveryoneCmd.Flags().String("team", "", "Team which every member of the organization belongs to")
 	addEveryoneCmd.MarkFlagRequired("team")

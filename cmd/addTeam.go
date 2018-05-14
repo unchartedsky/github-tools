@@ -52,7 +52,7 @@ var addTeamCmd = &cobra.Command{
 			raven.CaptureErrorAndWait(err, nil)
 			log.Fatal(err)
 		}
-		team := Find(teams, targetTeam)
+		team := findTeam(teams, targetTeam)
 		if team == nil {
 			raven.CaptureErrorAndWait(err, nil)
 			log.Fatalf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
@@ -70,7 +70,7 @@ var addTeamCmd = &cobra.Command{
 				repoName := *repo.Name
 				//fmt.Println(repoName)
 
-				if Contains(repo.Topics, topicToExclude) {
+				if contains(repo.Topics, topicToExclude) {
 					log.Printf("Repository `%s` has topic `%s` and is skipped.\n", repoName, topicToExclude)
 					continue
 				}
