@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	"github.com/google/go-github/github"
-	"github.com/deckarep/golang-set"
-	"sync"
+	"context"
 	"log"
 	"os"
-	"context"
+	"sync"
+
+	mapset "github.com/deckarep/golang-set"
 	"github.com/getsentry/raven-go"
+	"github.com/google/go-github/github"
 )
 
 func findTeam(teams []*github.Team, teamName string) *github.Team {
@@ -50,7 +51,7 @@ func getUserLogins(client *github.Client, ctx context.Context, org string, team 
 		}
 
 		wg.Done()
-	} ()
+	}()
 
 	var teamUsers []*github.User
 	go func() {
@@ -70,7 +71,7 @@ func getUserLogins(client *github.Client, ctx context.Context, org string, team 
 			opt.Page = resp.NextPage
 		}
 		wg.Done()
-	} ()
+	}()
 
 	wg.Wait()
 
@@ -90,14 +91,13 @@ func getUserLogins(client *github.Client, ctx context.Context, org string, team 
 	return newUserLogins(orgUsers, teamUsers)
 }
 
-
 func newUserLogins(orgUsers []*github.User, teamUsers []*github.User) mapset.Set {
 	// TODO 깔끔한 알고리즘으로 나중에 교체하자
 	orgUserIds := userToId(orgUsers)
 	orgLogins := mapset.NewSetFromSlice(orgUserIds)
 
 	teamUserIds := userToId(teamUsers)
-	teamLogins:= mapset.NewSetFromSlice(teamUserIds)
+	teamLogins := mapset.NewSetFromSlice(teamUserIds)
 
 	newUserLogins := orgLogins.Difference(teamLogins)
 

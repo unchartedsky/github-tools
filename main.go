@@ -15,10 +15,11 @@
 package main
 
 import (
-	"github.com/UnchartedSky/github-tools/cmd"
-	"github.com/getsentry/raven-go"
 	"log"
 	"os"
+
+	"github.com/UnchartedSky/github-tools/cmd"
+	"github.com/getsentry/raven-go"
 )
 
 func main() {

@@ -1,54 +1,38 @@
-.DEFAULT_GOAL = all
+NAME	:= github-tools
 
-GO := go
-GODOCKER=CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go
-VERSION  := $(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD)
+BIN		:= $(NAME)
 
-NAME     := github-tools
-PACKAGE  := github.com/corpix/$(NAME)
-PACKAGES := $(shell go list ./... | grep -v /vendor/)
+SHELL := /bin/bash
 
-BIN := $(NAME)
 
-TAG=latest
-IMAGE=unchartedsky/$(BIN)
+# go source files, ignore vendor directory
+SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 .PHONY: all
-all:: dependencies
-all:: build
+all: test
 
-dependencies::
-	dep ensure
+.PHONY: build
+build: fmt
+	@go build -o bin/$(BIN) .
 
-build: dependencies
-	$(GO) build -a -o bin/$(BIN) .
-
+.PHONY: test
 test: build
-	go test -v $(PACKAGES)
+	@go test .
 
-.PHONY: bench
-bench::
-	go test  -race -coverprofile=coverage.txt -covermode=atomic -bench=. -v $(PACKAGES)
+.PHONY: fmt
+fmt:
+	@ if ! which goimports > /dev/null; then \
+		go get -u -v golang.org/x/tools/cmd/goimports; \
+	fi
 
-.PHONY: lint
-lint::
-	go vet -v $(PACKAGES)
+	go mod tidy
+	goimports -l -w $(SRC)
+	gofmt -l -w -s $(SRC)
 
-.PHONY: check
-check:: lint test
+.PHONY: run
+run: build
+	bin/$(BIN)
 
-image: dependencies
-	$(GODOCKER) build -a -o bin/$(BIN) .
-	docker build -t $(IMAGE):$(TAG) .
-
-deploy: image
-	docker push $(IMAGE):$(TAG)
-
-.PHONY: clean
-clean:
-	rm -rf bin/
-	rm -f coverage.txt
-
-cleanall: clean
-	rm -rf vendor/
-	# git clean -xddff
+.PHONY: snapshot
+snapshot:
+	goreleaser --snapshot --rm-dist

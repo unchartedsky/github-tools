@@ -15,11 +15,12 @@
 package cmd
 
 import (
+	"log"
 	"os"
+
 	"github.com/getsentry/raven-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"log"
 )
 
 var cfgFile string
@@ -28,7 +29,7 @@ var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:   "github-tools",
 	Short: "GitHub management tool",
-	Long: ``,
+	Long:  ``,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	//	Run: func(cmd *cobra.Command, args []string) { },

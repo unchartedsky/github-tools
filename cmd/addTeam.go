@@ -17,12 +17,13 @@ package cmd
 import (
 	"context"
 
+	"log"
+
+	"github.com/getsentry/raven-go"
+	"github.com/google/go-github/github"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"log"
 	"golang.org/x/oauth2"
-	"github.com/google/go-github/github"
-	"github.com/getsentry/raven-go"
 )
 
 // addTeamCmd represents the addTeam command
@@ -44,7 +45,6 @@ var addTeamCmd = &cobra.Command{
 		tc := oauth2.NewClient(ctx, ts)
 
 		client := github.NewClient(tc)
-
 
 		teams, _, err := client.Organizations.ListTeams(ctx, targetOrg, nil)
 		if err != nil {
@@ -75,7 +75,7 @@ var addTeamCmd = &cobra.Command{
 					continue
 				}
 
-				option := &github.OrganizationAddTeamRepoOptions {Permission: permission}
+				option := &github.OrganizationAddTeamRepoOptions{Permission: permission}
 				_, err = client.Organizations.AddTeamRepo(ctx, *team.ID, targetOrg, repoName, option)
 				if err != nil {
 					raven.CaptureErrorAndWait(err, nil)
@@ -93,7 +93,6 @@ var addTeamCmd = &cobra.Command{
 	},
 }
 
-
 func init() {
 	RootCmd.AddCommand(addTeamCmd)
 
@@ -107,7 +106,7 @@ func init() {
 	// is called directly, e.g.:
 	// addTeamCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	addTeamCmd.Flags().String("org", "" , "GitHub organization")
+	addTeamCmd.Flags().String("org", "", "GitHub organization")
 	addTeamCmd.MarkFlagRequired("org")
 	addTeamCmd.Flags().String("team", "", "Team which every member of the organization belongs to")
 	addTeamCmd.MarkFlagRequired("team")

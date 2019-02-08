@@ -16,13 +16,15 @@ package cmd
 
 import (
 	"context"
+
 	"github.com/spf13/cobra"
 
-	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
-	"github.com/spf13/viper"
 	"log"
+
 	"github.com/getsentry/raven-go"
+	"github.com/google/go-github/github"
+	"github.com/spf13/viper"
+	"golang.org/x/oauth2"
 )
 
 // addEveryoneCmd represents the add-everyone command
