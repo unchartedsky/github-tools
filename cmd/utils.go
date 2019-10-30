@@ -8,7 +8,7 @@ import (
 
 	mapset "github.com/deckarep/golang-set"
 	"github.com/getsentry/raven-go"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v28/github"
 )
 
 func findTeam(teams []*github.Team, teamName string) *github.Team {
@@ -55,9 +55,9 @@ func getUserLogins(client *github.Client, ctx context.Context, org string, team 
 
 	var teamUsers []*github.User
 	go func() {
-		opt := &github.OrganizationListTeamMembersOptions{ListOptions: github.ListOptions{PerPage: 30}}
+		opt := &github.TeamListTeamMembersOptions{ListOptions: github.ListOptions{PerPage: 30}}
 		for {
-			users, resp, err := client.Organizations.ListTeamMembers(ctx, team, opt)
+			users, resp, err := client.Teams.ListTeamMembers(ctx, team, opt)
 			if err != nil {
 				raven.CaptureErrorAndWait(err, nil)
 				log.Fatal(err)

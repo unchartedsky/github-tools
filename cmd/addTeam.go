@@ -20,7 +20,7 @@ import (
 	"log"
 
 	"github.com/getsentry/raven-go"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v28/github"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
@@ -46,7 +46,7 @@ var addTeamCmd = &cobra.Command{
 
 		client := github.NewClient(tc)
 
-		teams, _, err := client.Organizations.ListTeams(ctx, targetOrg, nil)
+		teams, _, err := client.Teams.ListTeams(ctx, targetOrg, nil)
 		if err != nil {
 			log.Printf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
 			raven.CaptureErrorAndWait(err, nil)
@@ -75,8 +75,8 @@ var addTeamCmd = &cobra.Command{
 					continue
 				}
 
-				option := &github.OrganizationAddTeamRepoOptions{Permission: permission}
-				_, err = client.Organizations.AddTeamRepo(ctx, *team.ID, targetOrg, repoName, option)
+				option := &github.TeamAddTeamRepoOptions{Permission: permission}
+				_, err = client.Teams.AddTeamRepo(ctx, *team.ID, targetOrg, repoName, option)
 				if err != nil {
 					raven.CaptureErrorAndWait(err, nil)
 					log.Fatal(err)

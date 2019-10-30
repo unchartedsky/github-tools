@@ -22,7 +22,7 @@ import (
 	"log"
 
 	"github.com/getsentry/raven-go"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v28/github"
 	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 )
@@ -45,7 +45,7 @@ var addEveryoneCmd = &cobra.Command{
 
 		client := github.NewClient(tc)
 
-		teams, _, err := client.Organizations.ListTeams(ctx, targetOrg, nil)
+		teams, _, err := client.Teams.ListTeams(ctx, targetOrg, nil)
 		if err != nil {
 			log.Printf("Team `%s` is not found in the organization `%s`!", targetTeam, targetOrg)
 			raven.CaptureErrorAndWait(err, nil)
@@ -54,8 +54,8 @@ var addEveryoneCmd = &cobra.Command{
 		team := findTeam(teams, targetTeam)
 		if team == nil {
 			newTeamPrivacy := "closed"
-			newTeam := &github.NewTeam{Name: targetTeam, Privacy: &newTeamPrivacy}
-			team, _, err = client.Organizations.CreateTeam(ctx, targetOrg, newTeam)
+			newTeam := github.NewTeam{Name: targetTeam, Privacy: &newTeamPrivacy}
+			team, _, err = client.Teams.CreateTeam(ctx, targetOrg, newTeam)
 			if err != nil {
 				log.Println(err)
 				raven.CaptureErrorAndWait(err, nil)
@@ -64,10 +64,11 @@ var addEveryoneCmd = &cobra.Command{
 		}
 
 		userLogins := getUserLogins(client, ctx, targetOrg, *team.ID)
+    opt := &github.TeamAddTeamMembershipOptions{Role: "member"}
 
 		for _, userLogin := range userLogins.ToSlice() {
 			login := userLogin.(string)
-			_, _, err := client.Organizations.AddTeamMembership(ctx, *team.ID, login, nil)
+			_, _, err := client.Teams.AddTeamMembership(ctx, *team.ID, login, opt)
 			if err != nil {
 				log.Printf("Failed to add a user `%s` to the team `%s`: ", login, targetTeam)
 				log.Print(err)
