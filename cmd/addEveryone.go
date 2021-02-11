@@ -64,7 +64,7 @@ var addEveryoneCmd = &cobra.Command{
 		}
 
 		userLogins := getUserLogins(client, ctx, targetOrg, *team.ID)
-    opt := &github.TeamAddTeamMembershipOptions{Role: "member"}
+		opt := &github.TeamAddTeamMembershipOptions{Role: "member"}
 
 		for _, userLogin := range userLogins.ToSlice() {
 			login := userLogin.(string)
